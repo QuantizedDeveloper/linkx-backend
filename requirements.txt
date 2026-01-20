@@ -1,0 +1,13 @@
+asgiref==3.11.0
+distlib==0.4.0
+Django==6.0.1
+django-cors-headers==4.9.0
+djangorestframework==3.16.1
+djangorestframework_simplejwt==5.5.1
+filelock==3.20.1
+numpy @ file:///home/builder/.termux-build/python-numpy/src/dist/numpy-2.2.5-cp312-cp312-linux_aarch64.whl#sha256=5bd061eb5e1323ce3e3f3e293dd720cbdff3a5b3ac066b0fcc963cb32949730d
+pillow==12.1.0
+platformdirs==4.5.1
+PyJWT==2.10.1
+sqlparse==0.5.5
+virtualenv==20.35.4
