@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-u_4^a6a0u$*+svouphbx!9p4estpzfbeybzj6qz_h)a1cm5)v0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+#CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -130,7 +130,20 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "quantizeddeveloper@gmail.com"
+EMAIL_HOST_PASSWORD = "hxrf bjvb htgh uajt"
+
+DEFAULT_FROM_EMAIL = "LinkX <quantizeddeveloper@gmail.com>"
+
+
+
 
 
 REST_FRAMEWORK = {
@@ -147,4 +160,6 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = False  # True in prod (HTTPS)
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000",
+"https://quantizeddeveloper.github.io",
+]
