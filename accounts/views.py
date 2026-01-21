@@ -73,7 +73,7 @@ from .utils import (
     reset_token_expiry,
 )
 
-
+@csrf_exempt
 @api_view(["POST"])
 def send_signup_otp(request):
     email = request.data.get("email")
@@ -94,7 +94,7 @@ def send_signup_otp(request):
     request.session["username"] = username
     request.session["password"] = password
     request.session["otp_verified"] = False
-    request.session.set_expiry(600000)  # 10 min
+    request.session.set_expiry(600)  # 10 min
 
     # Remove old OTPs
     EmailOTP.objects.filter(email=email, purpose="signup").delete()
@@ -157,7 +157,7 @@ def verify_signup_otp(request):
 
 
 
-
+@csrf_exempt
 @api_view(["POST"])
 def complete_signup(request):
     # 0️⃣ Get data from session

@@ -158,8 +158,26 @@ SIMPLE_JWT = {
 }
 CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SECURE = False  # True in prod (HTTPS)
+
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000",
 "https://quantizeddeveloper.github.io",
 ]
+
+
+
+
+CORS_ALLOWED_ORIGINS = [
+  "https://your-frontend-domain",
+  "https://quantizeddeveloper.github.io",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+  "https://your-frontend-domain",
+  "https://quantizeddeveloper.github.io",
+]
+
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = True
