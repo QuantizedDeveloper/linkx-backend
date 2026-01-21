@@ -76,47 +76,53 @@ from .utils import (
 @csrf_exempt
 @api_view(["POST"])
 def send_signup_otp(request):
-    email = request.data.get("email")
-    username = request.data.get("username")
-    password = request.data.get("password")
+    try:
+        email = request.data.get("email")
+        username = request.data.get("username")
+        password = request.data.get("password")
 
-    if not all([email, username, password]):
-        return Response({"error": "Missing fields"}, status=400)
+        if not all([email, username, password]):
+            return Response({"error": "Missing fields"}, status=400)
 
-    if User.objects.filter(email=email).exists():
-        return Response({"error": "Email already registered"}, status=400)
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "Email already registered"}, status=400)
 
-    if User.objects.filter(username=username).exists():
-        return Response({"error": "Username already taken"}, status=400)
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already taken"}, status=400)
 
-    # 🔐 Store signup identity in BACKEND SESSION
-    request.session["email"] = email
-    request.session["username"] = username
-    request.session["password"] = password
-    request.session["otp_verified"] = False
-    request.session.set_expiry(600)  # 10 min
+        request.session["email"] = email
+        request.session["username"] = username
+        request.session["password"] = password
+        request.session["otp_verified"] = False
+        request.session.set_expiry(600)
 
-    # Remove old OTPs
-    EmailOTP.objects.filter(email=email, purpose="signup").delete()
+        EmailOTP.objects.filter(email=email, purpose="signup").delete()
 
-    otp = generate_otp()
+        otp = generate_otp()
 
-    EmailOTP.objects.create(
-        email=email,
-        otp=otp,
-        purpose="signup",
-        expires_at=otp_expiry()
-    )
+        EmailOTP.objects.create(
+            email=email,
+            otp=otp,
+            purpose="signup",
+            expires_at=otp_expiry()
+        )
 
-    send_mail(
-        "Your LinkX OTP",
-        f"Your OTP is {otp}",
-        "no-reply@linkx.com",
-        [email],
-        fail_silently=False
-    )
+        send_mail(
+            "Your LinkX OTP",
+            f"Your OTP is {otp}",
+            "no-reply@linkx.com",
+            [email],
+            fail_silently=False
+        )
 
-    return Response({"message": "OTP sent"})
+        return Response({"message": "OTP sent"})
+
+    except Exception as e:
+        print("🔥 SEND SIGNUP OTP ERROR:", e)
+        return Response(
+            {"error": str(e)},
+            status=500
+        )
 
 
 @api_view(["POST"])
