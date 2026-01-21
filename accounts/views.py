@@ -20,7 +20,7 @@ from django.contrib.auth.models import User
 import json
 import base64
 import io
-import numpy as np
+#import numpy as np
 from io import BytesIO
 from PIL import Image
 
