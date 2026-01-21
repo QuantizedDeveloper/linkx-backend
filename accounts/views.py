@@ -382,33 +382,3 @@ def home_view(request):
     })
 
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-import numpy as np
-#from .models import UserFace
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def verify_face(request):
-    vectors = request.data.get("vectors")  # list of 128-d arrays
-    if not vectors or len(vectors) < 3:
-        return Response({"error": "Insufficient embeddings"}, status=400)
-
-    base = np.array(vectors[0])
-
-    # 1️⃣ Consistency across steps
-    for v in vectors[1:]:
-        if np.linalg.norm(base - np.array(v)) > 0.6:
-            return Response({"error": "Face mismatch across steps"}, status=400)
-
-    # 2️⃣ Duplicate check
-    for stored in UserFace.objects.all():
-        if np.linalg.norm(base - np.array(stored.embedding)) < 0.55:
-            return Response({"error": "Face already registered"}, status=400)
-
-    # 3️⃣ Store embedding
-    UserFace.objects.create(user=request.user, embedding=base.tolist())
-
-    return Response({"message": "Face verified successfully"})
-    
