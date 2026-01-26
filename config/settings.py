@@ -167,17 +167,22 @@ CORS_ALLOWED_ORIGINS = ["http://localhost:3000",
 
 
 
-CORS_ALLOWED_ORIGINS = [
-  "https://your-frontend-domain",
-  "https://quantizeddeveloper.github.io",
-]
 
 CSRF_TRUSTED_ORIGINS = [
-  "https://your-frontend-domain",
-  "https://quantizeddeveloper.github.io",
+    "https://quantizeddeveloper.github.io",
+    "https://linkx1.pythonanywhere.com",
 ]
+
+
 
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://quantizeddeveloper.github.io",
+    "https://linkx1.pythonanywhere.com",
+]
