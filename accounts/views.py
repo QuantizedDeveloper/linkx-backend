@@ -106,14 +106,15 @@ def send_signup_otp(request):
             purpose="signup",
             expires_at=otp_expiry()
         )
-
-        send_mail(
-            "Your LinkX OTP",
-            f"Your OTP is {otp}",
-            "no-reply@linkx.com",
-            [email],
-            fail_silently=False
-        )
+        print("OTP:", otp)
+        
+        #send_mail(
+        #    "Your LinkX OTP",
+         #   f"Your OTP is {otp}",
+         #   "no-reply@linkx.com",
+         #   [email],
+        #    fail_silently=False
+       # )
 
         return Response({"message": "OTP sent"})
 
