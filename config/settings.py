@@ -201,3 +201,5 @@ import os
 load_dotenv()   # ← automatically looks in project root
 
 ELASTIC_EMAIL_API_KEY = os.getenv("ELASTIC_EMAIL_API_KEY")
+
+ELASTIC_EMAIL_FROM = os.getenv("ELASTIC_EMAIL_FROM")
