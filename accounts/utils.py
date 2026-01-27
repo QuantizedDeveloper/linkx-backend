@@ -71,3 +71,39 @@ def cosine_similarity(v1, v2):
 
 
 FACE_MATCH_THRESHOLD = 0.82
+from django.conf import settings
+
+API_KEY = settings.ELASTIC_EMAIL_API_KEY
+FROM_EMAIL = settings.ELASTIC_EMAIL_FROM
+
+
+
+def send_otp_email(email, otp):
+    url = "https://api.brevo.com/v3/smtp/email"
+
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.BREVO_API_KEY,
+        "content-type": "application/json",
+    }
+
+    payload = {
+        "sender": {
+            "name": settings.BREVO_SENDER_NAME,
+            "email": settings.BREVO_SENDER_EMAIL,
+        },
+        "to": [{"email": email}],
+        "subject": "Your LinkX OTP",
+        "htmlContent": f"""
+            <h2>LinkX Verification</h2>
+            <p>Your OTP is:</p>
+            <h1>{otp}</h1>
+            <p>This OTP expires in 10 minutes.</p>
+        """,
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+
+
+    

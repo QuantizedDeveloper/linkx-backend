@@ -71,7 +71,12 @@ from .utils import (
     otp_expiry,
     #otp_expiry_time,
     reset_token_expiry,
+    #send_otp_via_brevo,
+    send_otp_email
 )
+
+
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -90,12 +95,14 @@ def send_signup_otp(request):
         if User.objects.filter(username=username).exists():
             return Response({"error": "Username already taken"}, status=400)
 
+        # Store signup data in session
         request.session["email"] = email
         request.session["username"] = username
         request.session["password"] = password
         request.session["otp_verified"] = False
         request.session.set_expiry(600)
 
+        # Remove old OTPs
         EmailOTP.objects.filter(email=email, purpose="signup").delete()
 
         otp = generate_otp()
@@ -104,26 +111,17 @@ def send_signup_otp(request):
             email=email,
             otp=otp,
             purpose="signup",
-            expires_at=otp_expiry()
+            expires_at=otp_expiry(),
         )
-        print("OTP:", otp)
-        
-        send_mail(
-            "Your LinkX OTP",
-            f"Your OTP is {otp}",
-            "no-reply@linkx.com",
-            [email],
-            fail_silently=False
-        )
+
+        # 🔥 Send OTP using Brevo
+        send_otp_email(email, otp)
 
         return Response({"message": "OTP sent"})
 
     except Exception as e:
         print("🔥 SEND SIGNUP OTP ERROR:", e)
-        return Response(
-            {"error": str(e)},
-            status=500
-        )
+        return Response({"error": "Internal server error"}, status=500)
 
 
 @api_view(["POST"])

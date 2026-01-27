@@ -191,3 +191,13 @@ CORS_ALLOWED_ORIGINS = [
     "https://quantizeddeveloper.github.io",
     "https://linkx1.pythonanywhere.com",
 ]
+# api key for email sending via brevo
+#BREVO_API_KEY = "YOUR_BREVO_API_KEY"
+#BREVO_SENDER_EMAIL = "no-reply@linkx.com"
+#BREVO_SENDER_NAME = "LinkX"
+from dotenv import load_dotenv
+import os
+
+load_dotenv()   # ← automatically looks in project root
+
+ELASTIC_EMAIL_API_KEY = os.getenv("ELASTIC_EMAIL_API_KEY")
