@@ -195,11 +195,28 @@ CORS_ALLOWED_ORIGINS = [
 #BREVO_API_KEY = "YOUR_BREVO_API_KEY"
 #BREVO_SENDER_EMAIL = "no-reply@linkx.com"
 #BREVO_SENDER_NAME = "LinkX"
+
+
+from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()   # ← automatically looks in project root
+# Base directory
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env from project root
+load_dotenv(BASE_DIR / ".env")
+
+# ==============================
+# Elastic Email configuration
+# ==============================
 
 ELASTIC_EMAIL_API_KEY = os.getenv("ELASTIC_EMAIL_API_KEY")
-
 ELASTIC_EMAIL_FROM = os.getenv("ELASTIC_EMAIL_FROM")
+
+# Optional safety check (remove after debugging)
+if not ELASTIC_EMAIL_API_KEY:
+    raise RuntimeError("ELASTIC_EMAIL_API_KEY is not set")
+
+if not ELASTIC_EMAIL_FROM:
+    raise RuntimeError("ELASTIC_EMAIL_FROM is not set")

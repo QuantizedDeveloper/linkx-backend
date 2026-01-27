@@ -71,6 +71,7 @@ def cosine_similarity(v1, v2):
 
 
 FACE_MATCH_THRESHOLD = 0.82
+FACE_MATCH_THRESHOLD = 0.82
 from django.conf import settings
 
 API_KEY = settings.ELASTIC_EMAIL_API_KEY
@@ -100,6 +101,46 @@ def send_otp_email(email, otp):
             <h1>{otp}</h1>
             <p>This OTP expires in 10 minutes.</p>
         """,
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+
+FACE_MATCH_THRESHOLD = 0.82
+import requests
+from django.conf import settings
+
+API_KEY = settings.ELASTIC_EMAIL_API_KEY
+FROM_EMAIL = settings.ELASTIC_EMAIL_FROM
+
+
+def send_otp_email(email, otp):
+    url = "https://api.elasticemail.com/v4/emails"
+
+    payload = {
+        "Recipients": {
+            "To": [email]
+        },
+        "Content": {
+            "From": FROM_EMAIL,
+            "Subject": "Your LinkX OTP",
+            "Body": [
+                {
+                    "ContentType": "HTML",
+                    "Content": f"""
+                        <h2>LinkX Verification</h2>
+                        <p>Your OTP is:</p>
+                        <h1>{otp}</h1>
+                        <p>This OTP expires in 10 minutes.</p>
+                    """
+                }
+            ]
+        }
+    }
+
+    headers = {
+        "X-ElasticEmail-ApiKey": API_KEY,
+        "Content-Type": "application/json"
     }
 
     response = requests.post(url, json=payload, headers=headers)

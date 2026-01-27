@@ -12,7 +12,7 @@
 from rest_framework.response import Response
 
 from .models import FaceEmbedding, EmailOTP
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 
 
 
