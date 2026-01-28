@@ -3,8 +3,6 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
-User = settings.AUTH_USER_MODEL
-
 class FreelancerProfile(models.Model):
     STATUS_CHOICES = [
         ('incomplete', 'Incomplete'),
@@ -15,7 +13,10 @@ class FreelancerProfile(models.Model):
         ('banned', 'Banned'),
     ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,  # ✅ correct usage
+        on_delete=models.CASCADE
+    )
     display_name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
@@ -31,8 +32,7 @@ class FreelancerProfile(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
    
-    # existing fields ...
-
+    # Payment fields
     upi_id = models.CharField(max_length=100, blank=True)
     razorpay_link = models.URLField(blank=True)
     instamojo_link = models.URLField(blank=True)
@@ -47,11 +47,9 @@ class FreelancerProfile(models.Model):
         null=True,
         blank=True
     )
-    # custom payment (single)
     custom_payment_label = models.CharField(max_length=50, blank=True, null=True)
     custom_payment_details = models.TextField(blank=True, null=True)
     
-
     def start_trial(self):
         self.trial_started_at = timezone.now()
         self.trial_ends_at = timezone.now() + timedelta(days=28)
@@ -60,7 +58,3 @@ class FreelancerProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.email} freelancer"
-
-
-    
-    

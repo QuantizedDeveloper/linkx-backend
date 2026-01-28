@@ -3,16 +3,16 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 
-User = settings.AUTH_USER_MODEL
-
-
 class Subscription(models.Model):
     PLAN_CHOICES = [
         ("free", "Free"),
         ("pro", "Pro"),
     ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,  # ✅ use settings.AUTH_USER_MODEL directly
+        on_delete=models.CASCADE
+    )
     plan = models.CharField(max_length=20, choices=PLAN_CHOICES)
     active = models.BooleanField(default=False)
 
@@ -22,3 +22,6 @@ class Subscription(models.Model):
     # payment meta (important later)
     payment_provider = models.CharField(max_length=50, blank=True, null=True)
     payment_ref = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.plan}"
