@@ -74,19 +74,22 @@ FACE_MATCH_THRESHOLD = 0.82
 import requests
 from django.conf import settings
 
-API_KEY = settings.ELASTIC_EMAIL_API_KEY
-FROM_EMAIL = settings.ELASTIC_EMAIL_FROM
+#API_KEY = settings.ELASTIC_EMAIL_API_KEY
+#FROM_EMAIL = settings.ELASTIC_EMAIL_FROM
+
+
+
 
 
 def send_otp_email(email, otp):
     url = "https://api.elasticemail.com/v4/emails"
 
     payload = {
-        "Recipients": {
-            "To": [email]
-        },
+        "Recipients": [
+            {"Email": email}
+        ],
         "Content": {
-            "From": FROM_EMAIL,
+            "From": settings.ELASTIC_EMAIL_FROM,
             "Subject": "Your LinkX OTP",
             "Body": [
                 {
@@ -103,12 +106,16 @@ def send_otp_email(email, otp):
     }
 
     headers = {
-        "X-ElasticEmail-ApiKey": API_KEY,
-        "Content-Type": "application/json"
+        "X-ElasticEmail-ApiKey": settings.ELASTIC_EMAIL_API_KEY,
+        "Content-Type": "application/json",
     }
 
     response = requests.post(url, json=payload, headers=headers)
+
+    # helpful debug
+    print("Elastic status:", response.status_code)
+    print("Elastic response:", response.text)
+
     response.raise_for_status()
-
-
+    
     
