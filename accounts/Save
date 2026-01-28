@@ -1,6 +1,22 @@
+from rest_framework.response import Response
+
+from .models import FaceEmbedding, EmailOTP
+#from django.contrib.auth.models import User
+
+from django.contrib.auth.models import UserFace
+
+
 import json
+import base64
+import io
+#import numpy as np
+from io import BytesIO
 from PIL import Image
+
+#import face_recognition
+
 from django.http import JsonResponse
+from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import authenticate
@@ -14,15 +30,26 @@ from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-import numpy as np  # ✅ REQUIRED (you use np later)
-
 from .models import (
     User,
     EmailOTP,
+    #UserFace,
     FaceEmbedding,
     PasswordResetOTP,
     PasswordResetToken,
 )
+
+#from .utils import (
+    
+#)
+
+
+from django.db import transaction
+from django.utils import timezone
+
+
+
+from .models import User, EmailOTP, FaceEmbedding
 
 from .utils import (
     validate_embedding,
@@ -31,13 +58,13 @@ from .utils import (
     canonical_embedding,
     generate_otp,
     otp_expiry,
+    #otp_expiry_time,
     reset_token_expiry,
-    send_otp_email,
+    #send_otp_via_brevo,
+    send_otp_email
 )
 
-# ✅ If these are not defined elsewhere, define them here (minimum safe defaults)
-MIN_FRAMES = 4
-DUPLICATE_THRESHOLD = 0.35
+
 
 
 @csrf_exempt
@@ -76,7 +103,7 @@ def send_signup_otp(request):
             expires_at=otp_expiry(),
         )
 
-        # Send OTP
+        # 🔥 Send OTP using Brevo
         send_otp_email(email, otp)
 
         return Response({"message": "OTP sent"})
@@ -93,6 +120,10 @@ def verify_signup_otp(request):
 
     if not email or not otp:
         return Response({"error": "Email and OTP required"}, status=400)
+
+    # 🔒 Ensure same signup session
+    #if request.session.get("email") != email:
+       # return Response({"error": "Session mismatch"}, status=403)
 
     record = EmailOTP.objects.filter(
         email=email,
@@ -111,16 +142,19 @@ def verify_signup_otp(request):
     record.is_verified = True
     record.save()
 
-    # Mark email verified in session
+    # ✅ Mark email verified IN SESSION
     request.session["otp_verified"] = True
 
     return Response({"message": "OTP verified"})
 
 
+
+
+
 @csrf_exempt
 @api_view(["POST"])
 def complete_signup(request):
-    # Get data from session
+    # 0️⃣ Get data from session
     email = request.session.get("email")
     username = request.session.get("username")
     password = request.session.get("password")
@@ -133,14 +167,14 @@ def complete_signup(request):
     if not isinstance(embeddings_data, list) or len(embeddings_data) < MIN_FRAMES:
         return Response({"error": "Minimum 4 face captures required"}, status=400)
 
-    # OTP verification
+    # 1️⃣ OTP verification
     otp_record = EmailOTP.objects.filter(
         email=email, purpose="signup", is_verified=True
     ).last()
     if not otp_record:
         return Response({"error": "OTP not verified"}, status=400)
 
-    # Validate embeddings
+    # 2️⃣ Validate embeddings
     embeddings = []
     for idx, emb in enumerate(embeddings_data):
         if not validate_embedding(emb):
@@ -150,18 +184,18 @@ def complete_signup(request):
             )
         embeddings.append(np.array(emb, dtype=np.float32))
 
-    # Same-person consistency
+    # 3️⃣ Same-person consistency
     if not check_same_person(embeddings):
         return Response(
             {"error": "Face mismatch across captures"},
             status=400
         )
 
-    # Create canonical embedding
+    # 4️⃣ Create canonical embedding
     canonical = canonical_embedding(embeddings)
     canonical /= np.linalg.norm(canonical)
 
-    # Duplicate detection
+    # 5️⃣ Duplicate detection
     for stored in FaceEmbedding.objects.only("embedding_vector"):
         stored_vec = np.array(stored.embedding_vector, dtype=np.float32)
         stored_vec /= np.linalg.norm(stored_vec)
@@ -172,7 +206,7 @@ def complete_signup(request):
                 status=409
             )
 
-    # Atomic user creation
+    # 6️⃣ Atomic user creation
     with transaction.atomic():
         user = User.objects.create_user(
             email=email,
@@ -189,7 +223,7 @@ def complete_signup(request):
         for k in ("email", "username", "password"):
             request.session.pop(k, None)
 
-    # Auto-login
+    # 7️⃣ Auto-login
     refresh = RefreshToken.for_user(user)
     return Response({
         "access": str(refresh.access_token),
@@ -197,16 +231,18 @@ def complete_signup(request):
     })
 
 
+
 @api_view(["POST"])
 def login_view(request):
     email = request.data.get("email")
     password = request.data.get("password")
 
-    if not email or not password:
+    try:
+        user_obj = User.objects.get(email=email)
+    except User.DoesNotExist:
         return Response({"message": "Invalid credentials"}, status=401)
 
-    # ✅ Correct authentication for custom user where USERNAME_FIELD='email'
-    user = authenticate(request, email=email, password=password)
+    user = authenticate(username=user_obj.username, password=password)
 
     if not user:
         return Response({"message": "Invalid credentials"}, status=401)
@@ -219,6 +255,8 @@ def login_view(request):
     })
 
 
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def me_view(request):
@@ -229,6 +267,8 @@ def me_view(request):
         "is_freelancer": user.is_freelancer,
         "is_staff": user.is_staff
     })
+
+
 
 
 @csrf_exempt
@@ -256,6 +296,7 @@ def forgot_password(request):
     print("OTP:", otp)
 
     return JsonResponse({"message": "OTP sent"})
+
 
 
 @csrf_exempt
@@ -296,6 +337,8 @@ def verify_otp(request):
         "reset_token": str(reset_token.token),
         "username": user.username
     })
+    
+
 
 
 @csrf_exempt
@@ -322,6 +365,8 @@ def reset_password(request):
     return JsonResponse({"message": "Password reset successful"})
 
 
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def home_view(request):
@@ -329,4 +374,5 @@ def home_view(request):
         "message": "Welcome",
         "username": request.user.username
     })
-    
+
+

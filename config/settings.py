@@ -136,16 +136,16 @@ STATIC_URL = 'static/'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+#EMAIL_HOST = "smtp.gmail.com"
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = "quantizeddeveloper@gmail.com"
-EMAIL_HOST_PASSWORD = "hxrf bjvb htgh uajt"
+#EMAIL_HOST_USER = "quantizeddeveloper@gmail.com"
+#EMAIL_HOST_PASSWORD = "hxrf bjvb htgh uajt"
 
-DEFAULT_FROM_EMAIL = "LinkX <quantizeddeveloper@gmail.com>"
+#DEFAULT_FROM_EMAIL = "LinkX <quantizeddeveloper@gmail.com>"
 
 
 
