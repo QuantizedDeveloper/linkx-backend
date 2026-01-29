@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
 from pathlib import Path
 from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -220,3 +219,4 @@ if not ELASTIC_EMAIL_API_KEY:
 
 if not ELASTIC_EMAIL_FROM:
     raise RuntimeError("ELASTIC_EMAIL_FROM is not set")
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

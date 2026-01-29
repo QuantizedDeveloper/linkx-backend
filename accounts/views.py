@@ -118,14 +118,18 @@ def verify_signup_otp(request):
     ).order_by("-id").first()
 
     if not record:
-        return Response({
-            "error": "Invalid OTP",
-            "debug": {
-                "email": email,
-                "otp": otp,
-                "last_records": last_records
-            }
-        }, status=400)
+      last = EmailOTP.objects.filter(email=email).order_by("-created_at").first()
+      return Response({
+        "error": "Invalid OTP",
+        "debug": {
+            "email_received": email,
+            "otp_received": otp,
+            "latest_db_otp": last.otp if last else None,
+            "latest_db_purpose": last.purpose if last else None,
+            "latest_db_is_verified": last.is_verified if last else None,
+        }
+    }, status=400)
+    
 
     if record.is_expired():
         record.delete()
