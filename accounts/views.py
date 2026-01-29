@@ -84,28 +84,48 @@ def send_signup_otp(request):
     except Exception as e:
         print("🔥 SEND SIGNUP OTP ERROR:", e)
         return Response({"error": "Internal server error"}, status=500)
+        
+        
+
+
+
 
 @api_view(["POST"])
 def verify_signup_otp(request):
-    email = request.data.get("email")
-    otp = request.data.get("otp")
+    email = str(request.data.get("email", "")).strip().lower()
+    otp = str(request.data.get("otp", "")).strip()
 
     if not email or not otp:
         return Response({"error": "Email and OTP required"}, status=400)
 
-    otp = str(otp).strip()
-    if len(otp) != 4:
-        return Response({"error": "OTP must be 4 digits"}, status=400)
+    # DEBUG: show last OTPs for that email
+    last_records = list(
+        EmailOTP.objects.filter(email=email)
+        .order_by("-id")
+        .values("id", "email", "otp", "purpose", "is_verified", "created_at")[:5]
+    )
 
+    print("INPUT EMAIL:", email)
+    print("INPUT OTP:", otp)
+    print("LAST RECORDS:", last_records)
+
+    # Now try to match normally
     record = EmailOTP.objects.filter(
         email=email,
         otp=otp,
         purpose="signup",
         is_verified=False
-    ).last()
+    ).order_by("-id").first()
 
     if not record:
-        return Response({"error": "Invalid OTP"}, status=400)
+        return Response({
+            "error": "Invalid OTP",
+            "debug": {
+                "email": email,
+                "otp": otp,
+                "last_records": last_records
+            }
+        }, status=400)
 
     if record.is_expired():
         record.delete()
@@ -114,7 +134,11 @@ def verify_signup_otp(request):
     record.is_verified = True
     record.save()
 
+    request.session["otp_verified"] = True
+    request.session["otp_verified_email"] = email
+
     return Response({"message": "OTP verified"}, status=200)
+
 
 
 
