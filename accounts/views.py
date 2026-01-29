@@ -85,7 +85,6 @@ def send_signup_otp(request):
         print("🔥 SEND SIGNUP OTP ERROR:", e)
         return Response({"error": "Internal server error"}, status=500)
 
-
 @api_view(["POST"])
 def verify_signup_otp(request):
     email = request.data.get("email")
@@ -93,6 +92,10 @@ def verify_signup_otp(request):
 
     if not email or not otp:
         return Response({"error": "Email and OTP required"}, status=400)
+
+    otp = str(otp).strip()
+    if len(otp) != 4:
+        return Response({"error": "OTP must be 4 digits"}, status=400)
 
     record = EmailOTP.objects.filter(
         email=email,
@@ -111,10 +114,9 @@ def verify_signup_otp(request):
     record.is_verified = True
     record.save()
 
-    # Mark email verified in session
-    request.session["otp_verified"] = True
+    return Response({"message": "OTP verified"}, status=200)
 
-    return Response({"message": "OTP verified"})
+
 
 
 @csrf_exempt
