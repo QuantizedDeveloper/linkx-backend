@@ -281,9 +281,9 @@ def forgot_password(request):
         otp=otp,
         expires_at=otp_expiry()
     )
-
+    send_otp_email(email, otp)
     # send email here
-    print("OTP:", otp)
+    #print("OTP:", otp)
 
     return JsonResponse({"message": "OTP sent"})
 
